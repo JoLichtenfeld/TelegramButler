@@ -1,0 +1,31 @@
+birthday_msg_time: '00:00:00'
+birthdays:  
+  Anna: 02/02/1985
+  Markus: 03/03/1992
+  Julia: 04/04/1988
+  Thomas: 05/05/1994
+  Laura: 06/06/1990
+  John: 07/07/1982
+  Maria: 08/08/1987
+group_chat_id: -987654321
+ics_trash_cans:
+  BIO: "BiomüFCll"
+  PPK: "Altpapier"
+  RM1: "Restmüll"
+  WET: "Plastikmüll"
+maintainer_chat_id: 123456789
+member_ids:
+- 329020317
+- 11573057
+- 1368180684
+- 784998176
+- 509625168
+- 6159047240
+- 123456787
+selected_trash_cans:
+- BIO
+- RM1
+snooze_time: 02:00:00
+token: xxxxxxxxxxxxxxxxxxxxxx # never publish your token!
+trash_msg_time: '17:00:00'
+waiting_for_disable: false
