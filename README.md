@@ -34,6 +34,7 @@ Copy the ```example_config.yaml``` and rename it to ```config.yaml```. Adapt it 
 Add an iCalendar file and call it ```waste_calendar.ics```.
 
 Finally, run ```bot.py```.
+Alternatively, you can create a systemd service that runs ```update_and_run.sh``` at startup.
 
 For auto-completion of the telegram commands do the following:
 - Text ```/setcommands``` to the *BotFather* bot
