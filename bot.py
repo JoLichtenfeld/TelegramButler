@@ -1,11 +1,13 @@
 """Main module of the bot."""
 
 from datetime import date, timedelta, time, datetime
-from telegram import Update, constants
-from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler, CallbackContext
+from functools import wraps
+from telegram import *
+from telegram.ext import *
 import pytz
 import random
 from utils import *
+from camera import capture_and_transfer_image
 
 CALENDAR_PATH = 'waste_calendar.ics'
 CONFIG_PATH = 'config.yaml'
@@ -34,6 +36,7 @@ class ButlerBot:
         self.application.add_handler(CommandHandler('random_film', self.randomFilmCommand))
         self.application.add_handler(CommandHandler('list_films', self.listFilmsCommand))
         self.application.add_handler(CommandHandler('remove_film', self.removeFilmCommand))
+        self.application.add_handler(CommandHandler('picture', self.pictureCommand))
         
         # send start message to maintainer
         self.application.job_queue.run_once(self.sendStartMsg, when=5, chat_id=self.config["maintainer_chat_id"])
@@ -69,9 +72,22 @@ class ButlerBot:
 
 
     async def sendStartMsg(self, context: CallbackContext) -> None:
-        """Informs the maintainer at startup"""
+        """Inform the maintainer at startup"""
         notification = "bot started"
         await context.bot.send_message(chat_id=context._chat_id, text=notification)
+
+
+    # TODO!
+    async def send_typing_action(func):
+        """Send typing action while processing func command."""
+        # Taken from https://stackoverflow.com/questions/61520440/pretending-that-telegram-bot-is-typing
+
+        @wraps(func)
+        async def command_func(self, update, context, *args, **kwargs):
+            await context.bot.send_chat_action(chat_id=update.effective_message.chat_id, action=constants.ChatAction.TYPING)            
+            return func(self, update, context, *args, **kwargs)
+        
+        return command_func
 
 
     async def verifyMessage(self, update: Update, context: ContextTypes.DEFAULT_TYPE, maintainer_only = False, group_only = True, members_only = True, private_chat_only = False, empty_msg_allowed = True) -> bool:
@@ -311,6 +327,28 @@ class ButlerBot:
             saveYAML(WATCHLIST_PATH, self.watchlist)
             text = "Removed \"" + film + "\" from watchlist"
         await context.bot.send_message(chat_id=update.effective_chat.id, text=text)
+
+    async def pictureCommand(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+        """Send a picture from the camera."""
+        if not await self.verifyMessage(update, context, group_only=False, members_only=True):
+            return
+        
+        self.last_picture_command = datetime.now()
+
+        wait_msg = await context.bot.send_message(chat_id=update.effective_chat.id, text="Capturing image...")
+
+        status, status_msg = capture_and_transfer_image(self.config["camera_user"], self.config["camera_ip"], self.config["camera_remote_path"], self.config["camera_local_path"])
+        if status != 0:
+            text = "Error capturing image: " + status_msg
+            await context.bot.send_message(chat_id=update.effective_chat.id, text=text)
+            return
+
+        # Delete the last message sent by the bot
+        await context.bot.delete_message(chat_id=update.effective_chat.id, message_id=wait_msg.message_id)
+
+        # Send the image
+        img_path = status_msg
+        await context.bot.send_photo(chat_id=update.effective_chat.id, photo=open(img_path, 'rb'))
 
 
     async def dailyTrashCheck(self, context: CallbackContext) -> None:
