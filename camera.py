@@ -25,5 +25,5 @@ def capture_and_transfer_image(path: str) -> (int, str):
     print("...done!")
 
     # Return success flag and path to image
-    return 0, f"{absolute_path}/image.jpg"
+    return 0, f"{absolute_path}/image_{timestamp}.jpg"
 
