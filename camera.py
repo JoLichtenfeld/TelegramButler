@@ -13,7 +13,7 @@ def capture_and_transfer_image(path: str) -> (int, str):
     absolute_path = f"/home/{os.environ['USER']}/{path_with_date}"
     os.makedirs(absolute_path, exist_ok=True)
 
-    libcamera_command = ["libcamera-still", "-n", "-o", f"{path_with_date}/image_{timestamp}.jpg"]
+    libcamera_command = ["libcamera-still", "-n", "-o", f"{absolute_path}/image_{timestamp}.jpg"]
 
     try:
         # Connect to Raspberry Pi, capture image
@@ -25,5 +25,5 @@ def capture_and_transfer_image(path: str) -> (int, str):
     print("...done!")
 
     # Return success flag and path to image
-    return 0, f"{path_with_date}/image.jpg"
+    return 0, f"{absolute_path}/image.jpg"
 
