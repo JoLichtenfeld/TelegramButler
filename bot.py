@@ -337,7 +337,7 @@ class ButlerBot:
 
         wait_msg = await context.bot.send_message(chat_id=update.effective_chat.id, text="Capturing image...")
 
-        status, status_msg = capture_and_transfer_image(self.config["camera_user"], self.config["camera_ip"], self.config["camera_remote_path"], self.config["camera_local_path"])
+        status, status_msg = capture_and_transfer_image(self.config["picture_path"])
         if status != 0:
             text = "Error capturing image: " + status_msg
             await context.bot.send_message(chat_id=update.effective_chat.id, text=text)
