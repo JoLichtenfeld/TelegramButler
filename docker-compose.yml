@@ -7,7 +7,7 @@ services:
       - TZ=Europe/Amsterdam     
       - TELEGRAM_TOKEN_FILE=/run/secrets/telegram_token
     volumes:
-      - ./secrets/telegram_token:/run/secrets/telegram_token:ro
+      - ./.secrets/telegram_token:/run/secrets/telegram_token:ro
       - ./config.yaml:/app/config.yaml:ro
       - ./waste_calendar.ics:/app/waste_calendar.ics:ro
       - ./watchlist.yaml:/app/watchlist.yaml

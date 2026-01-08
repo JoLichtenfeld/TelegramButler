@@ -1,6 +1,6 @@
 config.yaml
 watchlist.yaml
 waste_calendar.ics
-secrets/
+.secrets/
 __pycache__/
 *.pyc
