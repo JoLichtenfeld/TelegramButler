@@ -7,6 +7,7 @@ from telegram.ext import *
 import pytz
 import random
 from utils import *
+import os
 from camera import capture_and_transfer_image
 
 CALENDAR_PATH = 'waste_calendar.ics'
@@ -18,7 +19,18 @@ class ButlerBot:
     def __init__(self) -> None:              
         self.application = None        
 
-        self.config = loadYAML(CONFIG_PATH)        
+        self.config = loadYAML(CONFIG_PATH)
+        # Allow overriding sensitive values via environment variables or a token file
+        env_token = os.getenv("TELEGRAM_TOKEN")
+        token_file = os.getenv("TELEGRAM_TOKEN_FILE")
+        if token_file and os.path.exists(token_file):
+            try:
+                with open(token_file, 'r') as f:
+                    self.config["token"] = f.read().strip()
+            except Exception:
+                pass
+        elif env_token:
+            self.config["token"] = env_token
         self.waste_events = loadWasteEvents(CALENDAR_PATH, self.config['selected_trash_cans'])        
         self.watchlist = loadYAML(WATCHLIST_PATH)
 

@@ -40,7 +40,9 @@ For auto-completion of the telegram commands do the following:
 - Text ```/setcommands``` to the *BotFather* bot
 - Select this bot
 - Send the following text:
-```hello - Say hello
+
+```
+hello - Say hello
 birthdays - List all registered birthdays
 cake - Whose turn is it to bake the next cake?
 done - Disable the current reminder
@@ -50,5 +52,26 @@ talk - Tell me something in a private chat, and I'll forward it anonymously to e
 add_film - Add a film to our watchlist
 random_film - It does what you think it does...
 list_films - Lists the entire watchlist
-remove_film - Removes the respective film from the watchlist```
+remove_film - Removes the respective film from the watchlist
+```
+
+## Docker (Quick Start)
+
+Run the bot in a container with your local config and data mounted.
+
+- Prerequisites: Docker and Docker Compose
+- Prepare config: copy [example_config.yaml](example_config.yaml) to [config.yaml](config.yaml) and fill values. Place [waste_calendar.ics](waste_calendar.ics) and [watchlist.yaml](watchlist.yaml).
+- Build & start:
+	- `docker compose up -d --build`
+- Logs: `docker compose logs -f`
+- Stop: `docker compose down`
+
+Token options:
+- Keep `token` in [config.yaml](config.yaml) (mounted read-only), or
+- Set `TELEGRAM_TOKEN` in compose, or
+- Create [secrets/telegram_token](secrets/telegram_token) with the token and set in compose:
+	- `TELEGRAM_TOKEN_FILE=/run/secrets/telegram_token`
+	- Mount: `./secrets/telegram_token:/run/secrets/telegram_token:ro`
+
+See [docker-compose.yml](docker-compose.yml) for the service definition.
 

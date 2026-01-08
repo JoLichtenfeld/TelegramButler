@@ -1,0 +1,4 @@
+python-telegram-bot[job-queue]>=20.0,<21.0
+pytz>=2023.3
+icalendar>=5.0.0
+PyYAML>=6.0

@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+.git
+.waste_calendar.ics
+waste_calendar.ics
+config.yaml
+watchlist.yaml
+update_and_run.sh
