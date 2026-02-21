@@ -380,7 +380,15 @@ class ButlerBot:
         """Check if task was fullfilled in the meantime, sends reminder if not."""
         if not self.config["waiting_for_disable"]:
             return
-        
+
+        # Guard against stale flag left over from a previous run (e.g. bot was
+        # shut down before `disable` could reset it): only remind when there is
+        # actually a bin due tomorrow.
+        if not self.checkTrash():
+            self.config["waiting_for_disable"] = False
+            saveYAML(CONFIG_PATH, self.config)
+            return
+
         text = "Kleine Erinnerung"
         await context.bot.send_message(chat_id=context._chat_id, text=text)       
 
