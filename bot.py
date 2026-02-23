@@ -33,6 +33,12 @@ class ButlerBot:
             self.config["token"] = env_token
         self.waste_events = loadWasteEvents(CALENDAR_PATH, self.config['selected_trash_cans'])        
         self.watchlist = loadYAML(WATCHLIST_PATH)
+        # Arm the reminder flag only if trash is due tomorrow AND the user hasn't
+        # already confirmed /done for that date in a previous session.
+        tomorrow = date.today() + timedelta(days=1)
+        done_for = self.config.get("done_for_date")
+        already_done = done_for is not None and toDate(done_for) == tomorrow
+        self.waiting_for_disable = self.checkTrash() is not None and not already_done
 
         self.application = ApplicationBuilder().token(self.config["token"]).build()
 
@@ -190,13 +196,14 @@ class ButlerBot:
         if not await self.verifyMessage(update, context, group_only=True):
             return        
         
-        if not self.config["waiting_for_disable"]:
+        if not self.waiting_for_disable:
             return
                 
         msg = "Thanks, " + update.effective_user.first_name + "!"
         await context.bot.send_message(chat_id=context._chat_id, text=msg)
 
-        self.config["waiting_for_disable"] = False
+        self.waiting_for_disable = False
+        self.config["done_for_date"] = str(date.today() + timedelta(days=1))
         saveYAML(CONFIG_PATH, self.config)
 
 
@@ -372,31 +379,21 @@ class ButlerBot:
 
         notification = "Heute Abend bitte rausstellen: " + self.config["ics_trash_cans"][current_trash_can] + getRandomAnimalEmoji()
         await context.bot.send_message(chat_id=context._chat_id, text=notification)
-        self.config["waiting_for_disable"] = True
-        saveYAML(CONFIG_PATH, self.config)
+        self.waiting_for_disable = True
 
 
     async def reminder(self, context: CallbackContext) -> None:
         """Check if task was fullfilled in the meantime, sends reminder if not."""
-        if not self.config["waiting_for_disable"]:
+        if not self.waiting_for_disable:
             return
-
-        # Guard against stale flag left over from a previous run (e.g. bot was
-        # shut down before `disable` could reset it): only remind when there is
-        # actually a bin due tomorrow.
-        if not self.checkTrash():
-            self.config["waiting_for_disable"] = False
-            saveYAML(CONFIG_PATH, self.config)
-            return
-
+        
         text = "Kleine Erinnerung"
         await context.bot.send_message(chat_id=context._chat_id, text=text)       
 
 
     async def disable(self, context: CallbackContext) -> None:
         """Unset the flag."""
-        self.config["waiting_for_disable"] = False
-        saveYAML(CONFIG_PATH, self.config)
+        self.waiting_for_disable = False
 
 
 def main():
